@@ -1,0 +1,7 @@
+.idea
+.vscode
+kube-test.yaml
+Dockerfile
+Dockerfile-gaudi
+scripts
+env
