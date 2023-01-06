@@ -1,10 +1,7 @@
-import math
 
-import torch
 import os
 
-import torch.nn as nn
-import torch.nn.functional as F
+
 from pyro.infer import SVI, TraceMeanField_ELBO
 import pandas as pd
 import time
@@ -105,6 +102,15 @@ class ProdLDA(nn.Module):
 
 # news = fetch_20newsgroups(subset='all')
 def main():
+    device_id = 0
+    try:
+        import torch
+        import habana_frameworks.torch.core
+        import torch.nn as nn
+        import torch.nn.functional as F
+    except Exception as e:
+        print(f"Card {device_id} Failed to initialize Habana PyTorch: {str(e)}")
+        raise
     vectorizer = CountVectorizer(stop_words='english')
     nd = []
     for line in open(os.environ.get("DATA_FILE")):
@@ -113,15 +119,18 @@ def main():
     v = vectorizer.fit_transform(nd[0:int(os.environ.get("REC_NUM"))]).toarray()
     docs = torch.from_numpy(v)
     vocab = pd.DataFrame(columns=['word', 'index'])
-    # vocab['word'] = vectorizer.get_feature_names_out()
-    vocab['word'] = vectorizer.get_feature_names()
+    vocab['word'] = vectorizer.get_feature_names_out()
+    # vocab['word'] = vectorizer.get_feature_names()
     vocab['index'] = vocab.index
+
     seed = 0
     torch.manual_seed(seed)
     pyro.set_rng_seed(seed)
-    x = torch.cuda.is_available()
-    print("CUDA:",x)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
+    # x = torch.cuda.is_available()
+    # print("CUDA:",x)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def plot_word_cloud(b, ax, v, n):
         sorted_, indices = torch.sort(b, descending=True)
