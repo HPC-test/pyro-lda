@@ -11,7 +11,14 @@ from sklearn.feature_extraction.text import CountVectorizer
 from tqdm import trange
 import pyro.distributions as dist
 import cProfile
+device_id = 0
 
+import torch
+from habana_frameworks.torch.utils.library_loader import load_habana_module
+import habana_frameworks.torch.core as htcore
+import habana_frameworks.torch.distributed.hccl
+import torch.nn as nn
+import torch.nn.functional as F
 
 class Encoder(nn.Module):
     # Base class for the encoder net, used in the guide
@@ -102,15 +109,7 @@ class ProdLDA(nn.Module):
 
 # news = fetch_20newsgroups(subset='all')
 def main():
-    device_id = 0
-    try:
-        import torch
-        import habana_frameworks.torch.core
-        import torch.nn as nn
-        import torch.nn.functional as F
-    except Exception as e:
-        print(f"Card {device_id} Failed to initialize Habana PyTorch: {str(e)}")
-        raise
+
     vectorizer = CountVectorizer(stop_words='english')
     nd = []
     for line in open(os.environ.get("DATA_FILE")):
@@ -126,6 +125,13 @@ def main():
     seed = 0
     torch.manual_seed(seed)
     pyro.set_rng_seed(seed)
+    load_habana_module()
+    try:
+        device = torch.device("hpu")
+    except:
+        print("HPU:", 0)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 
     # x = torch.cuda.is_available()
