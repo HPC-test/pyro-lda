@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from pyro.infer import SVI, TraceMeanField_ELBO
 import pandas as pd
+import gc
 import time
 import pyro
 from sklearn.datasets import fetch_20newsgroups
@@ -137,6 +138,8 @@ def main():
         # ax.axis("off")
 
     num_topics = int(os.environ.get("NUM_TOPICS"))
+    gc.collect()
+    torch.cuda.empty_cache()
     docs = docs.float().to(device)
     batch_size = 100
     learning_rate = 1e-3
@@ -147,7 +150,7 @@ def main():
     prodLDA = ProdLDA(
         vocab_size=docs.shape[1],
         num_topics=num_topics,
-        hidden=100,
+        hidden=25,
         dropout=0.2
     )
     prodLDA.to(device)
