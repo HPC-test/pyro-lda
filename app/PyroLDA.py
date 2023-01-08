@@ -114,7 +114,7 @@ def main():
     docs = torch.from_numpy(v)
     vocab = pd.DataFrame(columns=['word', 'index'])
     # vocab['word'] = vectorizer.get_feature_names_out()
-    vocab['word'] = vectorizer.get_feature_names()
+    vocab['word'] = vectorizer.get_feature_names_out()
     vocab['index'] = vocab.index
     seed = 0
     torch.manual_seed(seed)

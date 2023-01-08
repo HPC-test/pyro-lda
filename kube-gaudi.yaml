@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lda-pyro-500
+spec:
+    containers:
+        - name: lda-pyro-cuda
+          image: subhasis79/pyro-lda-gaudi:1.0
+          env:
+            - name: Experiment_ID
+              value: "1-100-topic"
+            - name: OS_PASSWORD
+              value: "Sdsc2018#"
+            - name: OS_USERNAME
+              value: "sudasgupta@ucsd.edu"
+            - name: NUM_BATCHS
+              value: "50"
+            - name: NUM_TOPICS
+              value: "100"
+            - name: REC_NUM
+              value: "500"
+            - name: DATA_FILE
+              value: "/app/nyc-times/nytimes.txt"
+            - name: SWIFT_FILE
+              value: "nyc-times.tar.gz"
+            - name: PYTORCH_CUDA_ALLOC_CONF
+              value: "max_split_size_mb:20000"
+          command: ["/bin/sh", "-c"]
+          args: ["swift download LDA-text-benchmark $SWIFT_FILE; 
+          tar -xzvf nyc-times.tar.gz;
+          python3  -m cProfile -o $Experiment_ID PyroLDA.py;
+          "]
+          resources:
+            limits:
+              memory: 128Gi
+              cpu: 48
+            requests:
+              memory: 128Gi
+              cpu: 48
+    restartPolicy: Never
+    backoffLimit: 1

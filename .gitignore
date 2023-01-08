@@ -1,7 +1,7 @@
 .idea
 .vscode
 kube-test.yaml
+Dockerfile-old
 Dockerfile
-Dockerfile-gaudi
 scripts
 env
